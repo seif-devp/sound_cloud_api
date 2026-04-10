@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:get/get.dart';
 import 'package:sound_cloud_api/cubit_controller/track_cubit/cubit/track_cubit.dart';
-import 'package:sound_cloud_api/data/models/track_model.dart';
 import 'package:sound_cloud_api/presentation/widgets/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/bottom_area.dart';
 import 'package:sound_cloud_api/presentation/widgets/categories_widget.dart';
@@ -30,65 +28,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TrackCubit>(
-      create: (context) => TrackCubit()..getTracks('Harry Styles'),
-      child: Builder(
-        builder: (newContext) {
-          return Scaffold(
-            backgroundColor: bgColor,
-            body: SafeArea(
-              child: Stack(
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 150),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 150),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const HeaderWidget(),
-                        SearchBarWidget(
-                          onChanged: (value) {
-                            if (_debounce?.isActive ?? false)
-                              _debounce!.cancel();
-                            _debounce = Timer(
-                              const Duration(milliseconds: 600),
-                              () {
-                                newContext.read<TrackCubit>().getTracks(
-                                  value.isEmpty ? 'Harry Styles' : value,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        CategoriesWidget(),
-                        const SectionTitle(
-                          title: 'Mixes for You',
-                          showSeeAll: true,
-                        ),
-                        MixesListWidget(), // مربوط بالكيوبت
-                        const SectionTitle(
-                          title: 'Recently Played',
-                          showSeeAll: false,
-                        ),
-                        RecentlyPlayedWidget(), // مربوط بالكيوبت (بدون const)
-                        const SectionTitle(
-                          title: 'Trending Near You',
-                          showSeeAll: false,
-                        ),
-                        const TrendingSectionWidget(),
-                      ],
-                    ),
+                  const HeaderWidget(),
+                  SearchBarWidget(
+                    onChanged: (value) {
+                      if (_debounce?.isActive ?? false) _debounce!.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 600), () {
+                        context.read<TrackCubit>().getTracks(
+                          value.isEmpty ? 'Harry Styles' : value,
+                        );
+                      });
+                    },
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: BottomArea(), // مربوط بالكيوبت (بدون const)
+                  CategoriesWidget(),
+                  const SectionTitle(title: 'Mixes for You', showSeeAll: true),
+                  MixesListWidget(), // مربوط بالكيوبت
+                  const SectionTitle(
+                    title: 'Recently Played',
+                    showSeeAll: false,
                   ),
+                  RecentlyPlayedWidget(), // مربوط بالكيوبت (بدون const)
+                  const SectionTitle(
+                    title: 'Trending Near You',
+                    showSeeAll: false,
+                  ),
+                  const TrendingSectionWidget(),
                 ],
               ),
             ),
-          );
-        },
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: BottomArea(), // مربوط بالكيوبت (بدون const)
+            ),
+          ],
+        ),
       ),
     );
   }
