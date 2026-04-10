@@ -1,9 +1,21 @@
 import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:sound_cloud_api/data/models/track_model.dart';
 
 class DeezerServices {
   final String baseUrl = "https://api.deezer.com/search?q=";
-  final Dio dio = Dio();
+  final Dio dio = Dio()
+    ..interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 90,
+      ),
+    );
 
   Future<List<Track>> searchTracks({required String name}) async {
     // 👇 ضفنا الـ name في نهاية اللينك هنا
