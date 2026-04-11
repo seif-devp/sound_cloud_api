@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sound_cloud_api/cubit_controller/track_cubit/cubit/track_cubit.dart';
-import 'package:sound_cloud_api/presentation/widgets/app_colors.dart';
+import 'package:sound_cloud_api/core/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/track_theme.dart';
 
 class MiniPlayerWidget extends StatefulWidget {

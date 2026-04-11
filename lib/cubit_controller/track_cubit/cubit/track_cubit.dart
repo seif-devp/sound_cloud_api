@@ -8,13 +8,14 @@ part 'track_state.dart';
 
 class TrackCubit extends Cubit<TrackState> {
   final deezerServices = DeezerServices();
-  bool isPlaying = false; // حالة التشغيل العامة (شغالة ولا لأ)
+  bool isPlaying = false; 
 
-  // اللستة اللي هتشيل الأغاني اللي اشتغلت
   final List<Track> recentTracks = [];
 
-  // مشغل الصوت الفعلي
   final AudioPlayer audioPlayer = AudioPlayer();
+
+  final List<Track> tracks = []; // القائمة الرئيسية للأغاني
+  int currentTrackIndex = -1;
 
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<void>? _completionSubscription;
@@ -32,8 +33,10 @@ class TrackCubit extends Cubit<TrackState> {
     emit(TrackLoading());
     try {
       final fetchedTracks = await deezerServices.searchTracks(name: name);
+      tracks.clear();
+      tracks.addAll(fetchedTracks);
       // بنبعت الداتا لأول مرة ومفيش حاجة شغالة
-      emit(TrackLoaded(tracks: fetchedTracks));
+      emit(TrackLoaded(tracks: tracks, currentTrackIndex: -1));
     } catch (e) {
       emit(TrackError(e.toString()));
     }
@@ -54,6 +57,7 @@ class TrackCubit extends Cubit<TrackState> {
               isPlaying: false,
               position: currentState.position,
               duration: currentState.duration,
+              currentTrackIndex: currentTrackIndex,
             ),
           );
         } else {
@@ -65,11 +69,20 @@ class TrackCubit extends Cubit<TrackState> {
               isPlaying: true,
               position: currentState.position,
               duration: currentState.duration,
+              currentTrackIndex: currentTrackIndex,
             ),
           );
         }
       } else {
         await audioPlayer.stop();
+
+        // إضافة الأغنية للقائمة إذا مش موجودة
+        if (!tracks.any((t) => t.id == track.id)) {
+          tracks.add(track);
+          currentTrackIndex = tracks.length - 1;
+        } else {
+          currentTrackIndex = tracks.indexOf(track);
+        }
 
         if (track.preview != null) {
           await audioPlayer.play(UrlSource(track.preview!));
@@ -83,11 +96,12 @@ class TrackCubit extends Cubit<TrackState> {
 
         emit(
           TrackLoaded(
-            tracks: currentState.tracks,
+            tracks: tracks,
             currentTrack: track,
             isPlaying: true,
             position: Duration.zero,
             duration: const Duration(seconds: 30),
+            currentTrackIndex: currentTrackIndex,
           ),
         );
       }
@@ -107,6 +121,7 @@ class TrackCubit extends Cubit<TrackState> {
             isPlaying: currentState.isPlaying,
             position: adjustedPosition,
             duration: duration,
+            currentTrackIndex: currentTrackIndex,
           ),
         );
       }
@@ -124,9 +139,41 @@ class TrackCubit extends Cubit<TrackState> {
             isPlaying: false,
             position: currentState.duration,
             duration: currentState.duration,
+            currentTrackIndex: currentTrackIndex,
           ),
         );
       }
+    }
+  }
+
+  void addToTracks(Track track) {
+    if (!tracks.any((t) => t.id == track.id)) {
+      tracks.add(track);
+      if (state is TrackLoaded) {
+        final currentState = state as TrackLoaded;
+        emit(TrackLoaded(
+          tracks: tracks,
+          currentTrack: currentState.currentTrack,
+          isPlaying: currentState.isPlaying,
+          position: currentState.position,
+          duration: currentState.duration,
+          currentTrackIndex: currentTrackIndex,
+        ));
+      }
+    }
+  }
+
+  void playNext() {
+    if (currentTrackIndex < tracks.length - 1) {
+      currentTrackIndex++;
+      playTrack(tracks[currentTrackIndex]);
+    }
+  }
+
+  void playPrevious() {
+    if (currentTrackIndex > 0) {
+      currentTrackIndex--;
+      playTrack(tracks[currentTrackIndex]);
     }
   }
 

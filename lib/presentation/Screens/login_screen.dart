@@ -156,8 +156,7 @@ class LoginScreen extends StatelessWidget {
                                         label: '',
                                         icon: Lottie.asset(
                                           'assets/icons/google_icon.json',
-                                          width: 60,
-                                          height: 60,
+                                        
                                         ),
                                         onTap: () {
                                           // TODO: جوجل لوجين لوجيك
@@ -259,7 +258,7 @@ class _SocialButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon,
+            SizedBox(  width: 60, height: 60,child: icon),
             const SizedBox(width: 8),
             Text(
               label,

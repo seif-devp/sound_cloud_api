@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sound_cloud_api/presentation/widgets/app_colors.dart';
+import 'package:sound_cloud_api/core/app_colors.dart';
 
 class CategoriesWidget extends StatefulWidget {
   const CategoriesWidget({Key? key}) : super(key: key);

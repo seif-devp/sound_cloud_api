@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sound_cloud_api/presentation/widgets/app_colors.dart';
+import 'package:sound_cloud_api/core/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/mini_player_widget.dart';
 import 'package:sound_cloud_api/presentation/widgets/nav_item.dart';
 

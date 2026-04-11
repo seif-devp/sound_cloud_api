@@ -13,11 +13,12 @@ class TrackError extends TrackState {
 
 // 👇 كبرنا الـ State دي عشان تشيل الشاشة كلها (لستة الأغاني + الأغنية الشغالة)
 final class TrackLoaded extends TrackState {
-  final List<Track> tracks;
+  final List<Track> tracks; // قائمة الأغاني (القائمة الرئيسية)
   final Track? currentTrack; // الأغنية اللي شغالة دلوقتي
   final bool isPlaying; // شغالة ولا متوقفة؟
   final Duration position; // موقع التشغيل الحالي
   final Duration duration; // مدة التشغيل (ثابتة 30 ثانية)
+  final int currentTrackIndex; // الفهرس الحالي في القائمة
 
   TrackLoaded({
     required this.tracks,
@@ -25,5 +26,6 @@ final class TrackLoaded extends TrackState {
     this.isPlaying = false,
     this.position = Duration.zero,
     this.duration = const Duration(seconds: 30),
+    this.currentTrackIndex = -1,
   });
 }

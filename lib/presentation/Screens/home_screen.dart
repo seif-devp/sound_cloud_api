@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sound_cloud_api/cubit_controller/track_cubit/cubit/track_cubit.dart';
-import 'package:sound_cloud_api/presentation/widgets/app_colors.dart';
+import 'package:sound_cloud_api/core/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/bottom_area.dart';
 import 'package:sound_cloud_api/presentation/widgets/categories_widget.dart';
 import 'package:sound_cloud_api/presentation/widgets/header_widget.dart';
