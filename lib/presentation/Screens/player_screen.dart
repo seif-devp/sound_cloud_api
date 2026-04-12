@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sound_cloud_api/cubit_controller/music_player_cubit/player_ui_cubit.dart';
+import 'package:sound_cloud_api/cubit_controller/music_player_cubit/player_ui_state.dart';
 import 'package:sound_cloud_api/cubit_controller/track_cubit/cubit/track_cubit.dart';
 import 'package:sound_cloud_api/core/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/track_theme.dart';
@@ -17,7 +17,8 @@ class PlayerScreen extends StatelessWidget {
         builder: (context, trackState) {
           return BlocBuilder<PlayerUiCubit, PlayerUiState>(
             builder: (context, uiState) {
-              if (trackState is! TrackLoaded || trackState.currentTrack == null) {
+              if (trackState is! TrackLoaded ||
+                  trackState.currentTrack == null) {
                 return Scaffold(
                   backgroundColor: bgColor,
                   body: SafeArea(
@@ -33,8 +34,10 @@ class PlayerScreen extends StatelessWidget {
 
               final track = trackState.currentTrack!;
               final progress = trackState.duration.inMilliseconds > 0
-                  ? trackState.position.inMilliseconds / trackState.duration.inMilliseconds
+                  ? trackState.position.inMilliseconds /
+                        trackState.duration.inMilliseconds
                   : 0.0;
+              final nextTrackIndex = trackState.tracks.indexOf(track) + 1;
 
               // Load theme from image
               final themeFuture = TrackTheme.fromImageUrl(track.album.coverBig);
@@ -67,9 +70,14 @@ class PlayerScreen extends StatelessWidget {
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 220),
                           curve: Curves.easeOutCubic,
-                          transform: Matrix4.translationValues(0, uiState.dragDistance, 0),
+                          transform: Matrix4.translationValues(
+                            0,
+                            uiState.dragDistance,
+                            0,
+                          ),
                           child: Opacity(
-                            opacity: (1.0 - (uiState.dragDistance / 320.0)).clamp(0.55, 1.0),
+                            opacity: (1.0 - (uiState.dragDistance / 320.0))
+                                .clamp(0.55, 1.0),
                             child: SafeArea(
                               child: GestureDetector(
                                 behavior: HitTestBehavior.translucent,
@@ -77,10 +85,16 @@ class PlayerScreen extends StatelessWidget {
                                   final scrollController = ScrollController();
                                   if (scrollController.hasClients &&
                                       (scrollController.position.pixels <=
-                                              scrollController.position.minScrollExtent + 0.5 ||
+                                              scrollController
+                                                      .position
+                                                      .minScrollExtent +
+                                                  0.5 ||
                                           uiState.dragDistance > 0)) {
-                                    if (details.delta.dy > 0 || uiState.dragDistance > 0) {
-                                      context.read<PlayerUiCubit>().updateDragDistance(details.delta.dy);
+                                    if (details.delta.dy > 0 ||
+                                        uiState.dragDistance > 0) {
+                                      context
+                                          .read<PlayerUiCubit>()
+                                          .updateDragDistance(details.delta.dy);
                                     }
                                   }
                                 },
@@ -97,24 +111,46 @@ class PlayerScreen extends StatelessWidget {
                                     final scrollController = ScrollController();
                                     if (scrollController.hasClients &&
                                         scrollController.position.pixels <=
-                                            scrollController.position.minScrollExtent + 0.5) {
-                                      if (notification is ScrollUpdateNotification &&
+                                            scrollController
+                                                    .position
+                                                    .minScrollExtent +
+                                                0.5) {
+                                      if (notification
+                                              is ScrollUpdateNotification &&
                                           notification.dragDetails != null &&
-                                          notification.dragDetails!.delta.dy > 0) {
-                                        context.read<PlayerUiCubit>().updateDragDistance(notification.dragDetails!.delta.dy);
+                                          notification.dragDetails!.delta.dy >
+                                              0) {
+                                        context
+                                            .read<PlayerUiCubit>()
+                                            .updateDragDistance(
+                                              notification
+                                                  .dragDetails!
+                                                  .delta
+                                                  .dy,
+                                            );
                                         return true;
                                       }
 
-                                      if (notification is OverscrollNotification &&
+                                      if (notification
+                                              is OverscrollNotification &&
                                           notification.dragDetails != null &&
-                                          notification.dragDetails!.delta.dy > 0) {
-                                        context.read<PlayerUiCubit>().updateDragDistance(notification.dragDetails!.delta.dy.abs() * 0.8);
+                                          notification.dragDetails!.delta.dy >
+                                              0) {
+                                        context
+                                            .read<PlayerUiCubit>()
+                                            .updateDragDistance(
+                                              notification.dragDetails!.delta.dy
+                                                      .abs() *
+                                                  0.8,
+                                            );
                                         return true;
                                       }
                                     }
 
-                                    if (notification is ScrollEndNotification && uiState.dragDistance > 0) {
-                                      final cubit = context.read<PlayerUiCubit>();
+                                    if (notification is ScrollEndNotification &&
+                                        uiState.dragDistance > 0) {
+                                      final cubit = context
+                                          .read<PlayerUiCubit>();
                                       if (cubit.shouldPop()) {
                                         context.pop();
                                       } else {
@@ -129,7 +165,8 @@ class PlayerScreen extends StatelessWidget {
                                     physics: const BouncingScrollPhysics(),
                                     padding: const EdgeInsets.only(bottom: 40),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -146,7 +183,10 @@ class PlayerScreen extends StatelessWidget {
                                                   height: 4,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white24,
-                                                    borderRadius: BorderRadius.circular(10),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
                                                   ),
                                                 ),
                                               ),
@@ -157,9 +197,12 @@ class PlayerScreen extends StatelessWidget {
                                                     onTap: () => context.pop(),
                                                     child: const CircleAvatar(
                                                       radius: 18,
-                                                      backgroundColor: Color(0xFF2C2547),
+                                                      backgroundColor: Color(
+                                                        0xFF2C2547,
+                                                      ),
                                                       child: Icon(
-                                                        Icons.keyboard_arrow_down,
+                                                        Icons
+                                                            .keyboard_arrow_down,
                                                         color: Colors.white,
                                                       ),
                                                     ),
@@ -171,7 +214,8 @@ class PlayerScreen extends StatelessWidget {
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                   ),
@@ -187,18 +231,30 @@ class PlayerScreen extends StatelessWidget {
                                         const SizedBox(height: 30),
                                         Center(
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(30),
+                                            borderRadius: BorderRadius.circular(
+                                              30,
+                                            ),
                                             child: Image.network(
                                               track.album.coverBig,
-                                              width: MediaQuery.of(context).size.width * 0.9,
-                                              height: MediaQuery.of(context).size.width * 0.9,
+                                              width:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.7,
+                                              height:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.7,
                                               fit: BoxFit.cover,
                                             ),
                                           ),
                                         ),
                                         const SizedBox(height: 30),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                          ),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -223,27 +279,41 @@ class PlayerScreen extends StatelessWidget {
                                               ),
                                               const SizedBox(height: 26),
                                               ClipRRect(
-                                                borderRadius: BorderRadius.circular(12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                                 child: LinearProgressIndicator(
-                                                  value: progress.clamp(0.0, 1.0),
+                                                  value: progress.clamp(
+                                                    0.0,
+                                                    1.0,
+                                                  ),
                                                   minHeight: 6,
-                                                  backgroundColor: Colors.white12,
-                                                  valueColor: AlwaysStoppedAnimation<Color>(themeColors.accent),
+                                                  backgroundColor:
+                                                      Colors.white12,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(themeColors.accent),
                                                 ),
                                               ),
                                               const SizedBox(height: 10),
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    _formatDuration(trackState.position),
+                                                    _formatDuration(
+                                                      trackState.position,
+                                                    ),
                                                     style: const TextStyle(
                                                       color: Colors.white54,
                                                       fontSize: 12,
                                                     ),
                                                   ),
                                                   Text(
-                                                    _formatDuration(trackState.duration),
+                                                    _formatDuration(
+                                                      trackState.duration,
+                                                    ),
                                                     style: const TextStyle(
                                                       color: Colors.white54,
                                                       fontSize: 12,
@@ -253,33 +323,47 @@ class PlayerScreen extends StatelessWidget {
                                               ),
                                               const SizedBox(height: 32),
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
                                                 children: [
                                                   _IconButton(
                                                     icon: Icons.shuffle,
                                                     label: 'Shuffle',
+                                                    onPressed: () {
+                                                      // TODO: Implement shuffle functionality;
+                                                    },
                                                   ),
                                                   _IconButton(
                                                     icon: Icons.skip_previous,
                                                     label: 'Prev',
-                                                    onPressed: () => context.read<TrackCubit>().playPrevious(),
+                                                    onPressed: () => context
+                                                        .read<TrackCubit>()
+                                                        .playPrevious(),
                                                   ),
                                                   CircleAvatar(
                                                     radius: 32,
-                                                    backgroundColor: themeColors.accent,
+                                                    backgroundColor:
+                                                        themeColors.accent,
                                                     child: IconButton(
                                                       icon: Icon(
-                                                        trackState.isPlaying ? Icons.pause : Icons.play_arrow,
+                                                        trackState.isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
                                                         color: Colors.black,
                                                         size: 32,
                                                       ),
-                                                      onPressed: () => context.read<TrackCubit>().playTrack(track),
+                                                      onPressed: () => context
+                                                          .read<TrackCubit>()
+                                                          .playTrack(track),
                                                     ),
                                                   ),
                                                   _IconButton(
                                                     icon: Icons.skip_next,
                                                     label: 'Next',
-                                                    onPressed: () => context.read<TrackCubit>().playNext(),
+                                                    onPressed: () => context
+                                                        .read<TrackCubit>()
+                                                        .playNext(),
                                                   ),
                                                   _IconButton(
                                                     icon: Icons.repeat,
@@ -297,60 +381,109 @@ class PlayerScreen extends StatelessWidget {
                                                 ),
                                               ),
                                               const SizedBox(height: 16),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: themeColors.secondary.withOpacity(0.18),
-                                                  borderRadius: BorderRadius.circular(20),
-                                                ),
-                                                padding: const EdgeInsets.all(18),
-                                                child: Row(
-                                                  children: [
-                                                    ClipRRect(
-                                                      borderRadius: BorderRadius.circular(12),
-                                                      child: Image.network(
-                                                        track.album.coverSmall,
-                                                        width: 60,
-                                                        height: 60,
-                                                        fit: BoxFit.cover,
+
+                                              BlocBuilder<
+                                                TrackCubit,
+                                                TrackState
+                                              >(
+                                                builder: (context, state) {
+                                                  if (state is! TrackLoaded ||
+                                                      state.tracks.isEmpty ||
+                                                      state.tracks.length <=
+                                                          nextTrackIndex) {
+                                                    return Text(
+                                                      'No upcoming tracks.',
+                                                      style: TextStyle(
+                                                        color: Colors.white54,
+                                                        fontSize: 14,
                                                       ),
-                                                    ),
-                                                    const SizedBox(width: 14),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(
-                                                            track.title,
-                                                            style: const TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight.bold,
-                                                            ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow.ellipsis,
+                                                    );
+                                                  }
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      color: themeColors
+                                                          .secondary
+                                                          .withOpacity(0.18),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
                                                           ),
-                                                          const SizedBox(height: 6),
-                                                          Text(
-                                                            track.artist.name,
-                                                            style: const TextStyle(
-                                                              color: Colors.white54,
-                                                              fontSize: 12,
-                                                            ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow.ellipsis,
+                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          18,
+                                                        ),
+                                                    child: Row(
+                                                      children: [
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                12,
+                                                              ),
+                                                          child: Image.network(
+                                                            trackState
+                                                                .tracks[nextTrackIndex]
+                                                                .album
+                                                                .coverMedium,
+                                                            width: 60,
+                                                            height: 60,
+                                                            fit: BoxFit.cover,
                                                           ),
-                                                        ],
-                                                      ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 14,
+                                                        ),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                trackState
+                                                                    .tracks[nextTrackIndex]
+                                                                    .title,
+                                                                style: const TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 6,
+                                                              ),
+                                                              Text(
+                                                                trackState
+                                                                    .tracks[nextTrackIndex]
+                                                                    .artist
+                                                                    .name,
+                                                                style: const TextStyle(
+                                                                  color: Colors
+                                                                      .white54,
+                                                                  fontSize: 12,
+                                                                ),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const Icon(
+                                                          Icons.more_horiz,
+                                                          color: Colors.white54,
+                                                        ),
+                                                      ],
                                                     ),
-                                                    const Icon(
-                                                      Icons.more_horiz,
-                                                      color: Colors.white54,
-                                                    ),
-                                                  ],
-                                                ),
+                                                  );
+                                                },
                                               ),
                                             ],
                                           ),
