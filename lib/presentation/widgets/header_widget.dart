@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HeaderWidget extends StatelessWidget {
   const HeaderWidget({Key? key}) : super(key: key);
@@ -24,7 +25,10 @@ class HeaderWidget extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.search, color: Colors.white70, size: 28),
+          GestureDetector(
+            onTap: () => context.pushNamed('search'),
+            child: const Icon(Icons.search, color: Colors.white70, size: 28),
+          ),
         ],
       ),
     );

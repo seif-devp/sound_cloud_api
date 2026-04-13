@@ -7,7 +7,6 @@ import 'package:sound_cloud_api/core/app_colors.dart';
 import 'package:sound_cloud_api/presentation/widgets/bottom_area.dart';
 import 'package:sound_cloud_api/presentation/widgets/categories_widget.dart';
 import 'package:sound_cloud_api/presentation/widgets/header_widget.dart';
-import 'package:sound_cloud_api/presentation/widgets/search_bar_widget.dart';
 import 'package:sound_cloud_api/presentation/widgets/section_title.dart';
 import 'package:sound_cloud_api/presentation/widgets/trending_section_widget.dart';
 
@@ -19,6 +18,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    // تحميل الأغاني الافتراضية عند فتح الصفحة
+    Future.delayed(Duration.zero, () {
+      context.read<TrackCubit>().getTracks('harry styles');
+    });
+  }
 
   @override
   void dispose() {
@@ -39,16 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const HeaderWidget(),
-                  SearchBarWidget(
-                    onChanged: (value) {
-                      if (_debounce?.isActive ?? false) _debounce!.cancel();
-                      _debounce = Timer(const Duration(milliseconds: 600), () {
-                        context.read<TrackCubit>().getTracks(
-                          value.isEmpty ? 'Harry Styles' : value,
-                        );
-                      });
-                    },
-                  ),
                   CategoriesWidget(),
                   const SectionTitle(title: 'Mixes for You', showSeeAll: true),
                   MixesListWidget(), // مربوط بالكيوبت
@@ -92,6 +90,14 @@ class MixesListWidget extends StatelessWidget {
               child: SpinKitCircle(color: accentCyan, size: 50),
             );
           } else if (state is TrackLoaded) {
+            if (state.tracks.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No tracks available",
+                  style: TextStyle(color: Colors.white54),
+                ),
+              );
+            }
             return ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(left: 20),
@@ -165,8 +171,18 @@ class MixesListWidget extends StatelessWidget {
                 );
               },
             );
+          } else if (state is TrackError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
-          return const SizedBox();
+          // TrackInitial state - show loading spinner
+          return const Center(
+            child: SpinKitCircle(color: accentCyan, size: 50),
+          );
         },
       ),
     );

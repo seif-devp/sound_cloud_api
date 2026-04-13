@@ -156,7 +156,6 @@ class LoginScreen extends StatelessWidget {
                                         label: '',
                                         icon: Lottie.asset(
                                           'assets/icons/google_icon.json',
-                                        
                                         ),
                                         onTap: () {
                                           // TODO: جوجل لوجين لوجيك
@@ -236,11 +235,11 @@ class _SocialButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _SocialButton({
-    super.key,
+    Key? key,
     required this.label,
     required this.icon,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +257,7 @@ class _SocialButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(  width: 60, height: 60,child: icon),
+            SizedBox(width: 60, height: 60, child: icon),
             const SizedBox(width: 8),
             Text(
               label,
